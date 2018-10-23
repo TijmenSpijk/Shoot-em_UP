@@ -1,18 +1,12 @@
 module Main where
 
+import State 
+import Controller
+import View
 import Graphics.Gloss
 
-window :: Display
-window = InWindow "Shoot'em Up" (400, 400) (10, 10)
-
-background :: Color
-background = white
-
-drawing :: Picture
-drawing = circle 80
-
 main :: IO ()
-main = display window background drawing
+main = play window background fps initialState render handleKeys movePlayer
               
 
 
