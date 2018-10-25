@@ -3,14 +3,15 @@ module Enteties where
 data Player = Player {
     playerState :: EntetieState,
     playerHealth :: Health,
-    playerPosition :: Point,
+    playerPosition :: (Float, Float),
+    playerMovement :: (Float, Float),
     powerUp :: PowerUp
 }
 
 data Enemy = Enemy {
     enemyState :: EntetieState,
     enemyHealth :: Health,
-    enemyPosition :: Point,
+    enemyPosition :: (Float, Float),
     enemyType :: EnemyType
 }
 
@@ -28,7 +29,7 @@ data PowerUp = ExtraHealth Energy
              | Nuke Energy
              | Empty Energy
 
-data Energy = Energy Float
+data Energy = Energy Int
 
 baseHealth :: Health
 baseHealth = Health 100
@@ -36,14 +37,40 @@ baseHealth = Health 100
 baseEnergy :: Energy
 baseEnergy = Energy 0
 
-startingPoint :: Point
-startingPoint = Point 0 -100
+startingPoint :: (Float, Float)
+startingPoint = (-200, 0)
+
+baseMovement :: (Float, Float)
+baseMovement = (0, 0)
 
 basePowerUp :: PowerUp
-basePowerUp = Empty 0
+basePowerUp = Empty (Energy 0)
 
-getPlayerLocation :: Player -> Point
-getPlayerLocation player = playerPosition player
+-- get functies voor Player
+getPlayerState :: Player -> EntetieState
+getPlayerState player = playerState player
 
-getEnemyLocation :: Enemy -> Point
-getEnemyLocation enemy = enemyPosition enemy
+getPlayerHealth :: Player -> Health
+getPlayerHealth player = playerHealth player
+
+getPlayerPosition :: Player -> (Float, Float)
+getPlayerPosition player = playerPosition player
+
+getPlayerMovement :: Player -> (Float, Float)
+getPlayerMovement player = playerMovement player
+
+getPlayerPowerUp :: Player -> PowerUp
+getPlayerPowerUp player = powerUp player
+
+-- get functies voor Enemies
+getEnemyState :: Enemy -> EntetieState
+getEnemyState enemy = enemyState enemy
+
+getEnemyHealth :: Enemy -> Health
+getEnemyHealth enemy = enemyHealth enemy
+
+getEnemyPosition :: Enemy -> (Float, Float)
+getEnemyPosition enemy = enemyPosition enemy
+
+getEnemyType :: Enemy -> EnemyType
+getEnemyType enemy = enemyType enemy

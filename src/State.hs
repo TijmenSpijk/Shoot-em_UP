@@ -4,9 +4,14 @@ import Enteties
 
 data Game = Game {
     player :: Player
-} deriving Show
+} 
 
 initialState :: Game
 initialState = Game {
-    player {Alive, baseHealth, startingPoint, basePowerUp}    
+    player = Player {
+        playerState = Alive, 
+        playerHealth = baseHealth, 
+        playerPosition = startingPoint, 
+        playerMovement = baseMovement,
+        powerUp = basePowerUp}   
 }
