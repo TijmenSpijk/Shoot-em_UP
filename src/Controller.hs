@@ -1,7 +1,7 @@
 module Controller where
 
 import State
-import Enteties
+import Entities
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game
 import Graphics.Gloss.Data.ViewPort
@@ -26,14 +26,18 @@ handleKeys (EventKey (Char 'w') _ _ _) game =
         Player {playerState = getPlayerState (player game),
                 playerHealth = getPlayerHealth (player game),
                 playerPosition = getPlayerPosition (player game),
-                playerMovement = (0, 30),
+                playerMovement = case (snd(getPlayerPosition (player game))) < 700 of
+                    True -> (0, 100)
+                    False -> (0,0),
                 powerUp = getPlayerPowerUp (player game)}}
 handleKeys (EventKey (Char 's') _ _ _) game = 
     game {player = 
         Player {playerState = getPlayerState (player game),
                 playerHealth = getPlayerHealth (player game),
                 playerPosition = getPlayerPosition (player game),
-                playerMovement = (0, -30),
+                playerMovement = case (snd(getPlayerPosition (player game))) > 0 of
+                    True -> (0, -100)
+                    False -> (0,0),
                 powerUp = getPlayerPowerUp (player game)}}
 handleKeys (EventKey (SpecialKey KeySpace) _ _ _) game = 
     game {player = 

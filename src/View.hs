@@ -1,7 +1,7 @@
 module View where
 
 import State 
-import Enteties
+import Entities
 import Graphics.Gloss
 
 render :: Game -> Picture

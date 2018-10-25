@@ -1,6 +1,6 @@
 module State where
 
-import Enteties
+import Entities
 
 data Game = Game {
     player :: Player

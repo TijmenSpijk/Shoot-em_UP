@@ -1,7 +1,7 @@
-module Enteties where
+module Entities where
 
 data Player = Player {
-    playerState :: EntetieState,
+    playerState :: EntityState,
     playerHealth :: Health,
     playerPosition :: (Float, Float),
     playerMovement :: (Float, Float),
@@ -9,7 +9,7 @@ data Player = Player {
 }
 
 data Enemy = Enemy {
-    enemyState :: EntetieState,
+    enemyState :: EntityState,
     enemyHealth :: Health,
     enemyPosition :: (Float, Float),
     enemyType :: EnemyType
@@ -21,7 +21,7 @@ data EnemyType = Soldier Health Energy
 
 data Health = Health Int
 
-data EntetieState = Alive
+data EntityState = Alive
                   | Dead
 
 data PowerUp = ExtraHealth Energy
@@ -47,7 +47,7 @@ basePowerUp :: PowerUp
 basePowerUp = Empty (Energy 0)
 
 -- get functies voor Player
-getPlayerState :: Player -> EntetieState
+getPlayerState :: Player -> EntityState
 getPlayerState player = playerState player
 
 getPlayerHealth :: Player -> Health
@@ -63,7 +63,7 @@ getPlayerPowerUp :: Player -> PowerUp
 getPlayerPowerUp player = powerUp player
 
 -- get functies voor Enemies
-getEnemyState :: Enemy -> EntetieState
+getEnemyState :: Enemy -> EntityState
 getEnemyState enemy = enemyState enemy
 
 getEnemyHealth :: Enemy -> Health
