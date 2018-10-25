@@ -38,7 +38,7 @@ baseEnergy :: Energy
 baseEnergy = Energy 0
 
 startingPoint :: (Float, Float)
-startingPoint = (-200, 0)
+startingPoint = (-600, 0)
 
 baseMovement :: (Float, Float)
 baseMovement = (0, 0)

@@ -13,12 +13,17 @@ movePlayer seconds game =
         Player {playerState = getPlayerState (player game),
                 playerHealth = getPlayerHealth (player game),
                 playerPosition = (x', y'),
-                playerMovement = (vx, vy),
+                playerMovement = case p of
+                    True -> (vx, vy)
+                    False -> (0,0),
                 powerUp = getPlayerPowerUp (player game)}}
     where (x, y) = playerPosition (player game)
           (vx, vy) = playerMovement (player game)
           x' = x + vx * seconds
-          y' = y + vy * seconds
+          y' = case p of
+            True -> y + vy * seconds
+            False -> y - (0.05 * vy)
+          p = snd(getPlayerPosition (player game)) <= 345 && snd(getPlayerPosition (player game)) >= -345
 
 handleKeys :: Event -> Game -> Game
 handleKeys (EventKey (Char 'w') _ _ _) game = 
@@ -26,18 +31,14 @@ handleKeys (EventKey (Char 'w') _ _ _) game =
         Player {playerState = getPlayerState (player game),
                 playerHealth = getPlayerHealth (player game),
                 playerPosition = getPlayerPosition (player game),
-                playerMovement = case (snd(getPlayerPosition (player game))) < 700 of
-                    True -> (0, 100)
-                    False -> (0,0),
+                playerMovement = (0, 100),
                 powerUp = getPlayerPowerUp (player game)}}
 handleKeys (EventKey (Char 's') _ _ _) game = 
     game {player = 
         Player {playerState = getPlayerState (player game),
                 playerHealth = getPlayerHealth (player game),
                 playerPosition = getPlayerPosition (player game),
-                playerMovement = case (snd(getPlayerPosition (player game))) > 0 of
-                    True -> (0, -100)
-                    False -> (0,0),
+                playerMovement = (0, -100),
                 powerUp = getPlayerPowerUp (player game)}}
 handleKeys (EventKey (SpecialKey KeySpace) _ _ _) game = 
     game {player = 

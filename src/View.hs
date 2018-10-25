@@ -14,7 +14,7 @@ fps :: Int
 fps = 60
 
 window :: Display
-window = InWindow "Shoot'em Up" (1280, 720) (10, 10)
+window = InWindow "Shoot'em Up" (1280, 720) (0, 0)
 
 background :: Color
 background = black
