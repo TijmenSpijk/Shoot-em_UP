@@ -6,4 +6,4 @@ import View
 import Graphics.Gloss
 
 main :: IO ()
-main = play window background fps initialState render handleKeys movePlayer
+main = play window background fps initialState render handleAllKeys moveEntities

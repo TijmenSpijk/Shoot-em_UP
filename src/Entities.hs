@@ -1,7 +1,5 @@
 module Entities where
 
-import System.Random
-
 data Player = Player {
     playerState :: EntityState,
     playerHealth :: Health,
@@ -61,7 +59,7 @@ setEnemyPosition :: (Float, Float)
 setEnemyPosition = (700, 0)
 
 setEnemyMovement :: (Float, Float)
-setEnemyMovement = (-20, 0)
+setEnemyMovement = (-100, 0)
 
 setEnemyType :: EnemyType
 setEnemyType = Soldier (Health 100) (Energy 10)
@@ -93,5 +91,13 @@ getEnemyHealth enemy = enemyHealth enemy
 getEnemyPosition :: Enemy -> (Float, Float)
 getEnemyPosition enemy = enemyPosition enemy
 
+getEnemyMovement :: Enemy -> (Float, Float)
+getEnemyMovement enemy = enemyMovement enemy
+
 getEnemyType :: Enemy -> EnemyType
 getEnemyType enemy = enemyType enemy
+
+-- creëer enemies
+--spawnEnemies :: Float -> Game -> Game
+--spawnEnemies = createEnemy
+

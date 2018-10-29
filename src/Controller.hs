@@ -6,36 +6,51 @@ import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game
 import Graphics.Gloss.Data.ViewPort
 
-
-movePlayer :: Float -> Game -> Game
-movePlayer seconds game = 
-    game {player = 
-        Player {playerState = getPlayerState (player game),
-                playerHealth = getPlayerHealth (player game),
+moveEntities :: Float -> Game -> Game
+moveEntities seconds game = case gameState game of
+    Play -> game {player = movePlayer seconds (player game),
+                  enemies = map (moveEnemy seconds) (enemies game)}
+    Pause -> game
+    
+                                
+movePlayer :: Float -> Player -> Player
+movePlayer seconds player = 
+        Player {playerState = getPlayerState player,
+                playerHealth = getPlayerHealth player,
                 playerPosition = (x', y'),
                 playerMovement = case p of
                     True -> (vx, vy)
                     False -> (0,0),
-                powerUp = getPlayerPowerUp (player game)}}
-    where (x, y) = playerPosition (player game)
-          (vx, vy) = playerMovement (player game)
-          x' = x + vx * seconds
+                powerUp = getPlayerPowerUp player}
+    where (x, y) = playerPosition player
+          (vx, vy) = playerMovement player
+          x' = x 
           y' = case p of
             True -> y + vy * seconds
             False -> y - (0.05 * vy)
-          p = snd(getPlayerPosition (player game)) <= 345 && snd(getPlayerPosition (player game)) >= -345
+          p = snd(getPlayerPosition player) <= 345 && snd(getPlayerPosition player) >= -345
 
-moveEnemies :: Float -> Game -> Game
-moveEnemies seconds game = 
-    game {enemies = Enemy {enemyState = Alive,
-                            enemyHealth = Health 100,
-                            enemyPosition = (x', y'),
-                            enemyMovement = case p of
-                                True -> (vx, vy)
-                                False -> (vx, -vy),
-                            enemyType = Soldier Health 100 Energy 10 }}
-    where (x, y) = enemyPosition ()
+moveEnemy :: Float -> Enemy -> Enemy
+moveEnemy seconds enemy = 
+        Enemy {enemyState = getEnemyState enemy,
+               enemyHealth = getEnemyHealth enemy,
+               enemyPosition = (x', y'),
+               enemyMovement = (vx, vy),
+               enemyType = getEnemyType enemy}
+    where (x, y) = getEnemyPosition enemy
+          (vx, vy) = getEnemyMovement enemy
+          x' = case fst(getEnemyPosition enemy) < (-640) of
+            True -> x
+            False -> x + vx * seconds                                                
+          y' = y                                                       
 
+handleAllKeys :: Event -> Game -> Game
+handleAllKeys (EventKey (Char 'p') _ _ _) game = case gameState game of 
+    Play -> game {gameState = Pause}
+    Pause -> game {gameState = Play}
+handleAllKeys event game = case gameState game of 
+    Play -> handleKeys event game
+    Pause -> game
 
 handleKeys :: Event -> Game -> Game
 handleKeys (EventKey (Char 'w') _ _ _) game = 

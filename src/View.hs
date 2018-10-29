@@ -5,10 +5,20 @@ import Entities
 import Graphics.Gloss
 
 render :: Game -> Picture
-render game = pictures [players]
-    where players = uncurry translate (playerLocation) $ color playerColor $ circleSolid 10
-          playerColor = dark red
-          playerLocation = getPlayerPosition (player game)
+render game = pictures (players : enemiess)
+    where players = renderPlayer (player game)
+          enemiess = map renderEnemy (enemies game)
+
+renderPlayer :: Player -> Picture
+renderPlayer player = uncurry translate (playerLocation) $ color playerColor $ circleSolid 10
+    where playerColor = dark red
+          playerLocation = getPlayerPosition player
+
+renderEnemy :: Enemy -> Picture
+renderEnemy enemy = uncurry translate (enemyLocation) $ color enemyColor $ circleSolid 12
+    
+    where enemyColor = light blue
+          enemyLocation = getEnemyPosition enemy
 
 fps :: Int
 fps = 60
