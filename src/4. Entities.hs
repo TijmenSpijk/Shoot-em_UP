@@ -111,5 +111,3 @@ getBulletPosition bullet = bulletPosition bullet
 
 getBulletMovement :: Bullet -> (Float, Float)
 getBulletMovement bullet = bulletMovement bullet
-
-

@@ -6,11 +6,17 @@ data Game = Game {
     gameState :: GameState,
     player :: Player,
     bullets :: [Bullet],
-    enemies :: [Enemy]
+    enemies :: [Enemy],
+    buttonW :: ButtonState,
+    buttonS :: ButtonState,
+    buttonP :: ButtonState
 }
 
 data GameState = Pause
                | Play
+
+data ButtonState = On
+                 | Off
 
 initialState :: Game
 initialState = Game {
@@ -22,7 +28,8 @@ initialState = Game {
         playerMovement = baseMovement,
         powerUp = basePowerUp},
     enemies = [enemy1, enemy2],
-    bullets = []
+    bullets = [],
+    buttonW = Off, buttonS = Off, buttonP = Off
 }
     where enemy1 = Enemy {enemyState = setEnemyState,
                           enemyHealth = setEnemyHealth,
