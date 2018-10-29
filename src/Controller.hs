@@ -25,6 +25,18 @@ movePlayer seconds game =
             False -> y - (0.05 * vy)
           p = snd(getPlayerPosition (player game)) <= 345 && snd(getPlayerPosition (player game)) >= -345
 
+moveEnemies :: Float -> Game -> Game
+moveEnemies seconds game = 
+    game {enemies = Enemy {enemyState = Alive,
+                            enemyHealth = Health 100,
+                            enemyPosition = (x', y'),
+                            enemyMovement = case p of
+                                True -> (vx, vy)
+                                False -> (vx, -vy),
+                            enemyType = Soldier Health 100 Energy 10 }}
+    where (x, y) = enemyPosition ()
+
+
 handleKeys :: Event -> Game -> Game
 handleKeys (EventKey (Char 'w') _ _ _) game = 
     game {player = 

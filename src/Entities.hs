@@ -1,5 +1,7 @@
 module Entities where
 
+import System.Random
+
 data Player = Player {
     playerState :: EntityState,
     playerHealth :: Health,
@@ -12,6 +14,7 @@ data Enemy = Enemy {
     enemyState :: EntityState,
     enemyHealth :: Health,
     enemyPosition :: (Float, Float),
+    enemyMovement :: (Float, Float),
     enemyType :: EnemyType
 }
 
@@ -31,6 +34,7 @@ data PowerUp = ExtraHealth Energy
 
 data Energy = Energy Int
 
+-- Base values (mainly for player)
 baseHealth :: Health
 baseHealth = Health 100
 
@@ -45,6 +49,23 @@ baseMovement = (0, 0)
 
 basePowerUp :: PowerUp
 basePowerUp = Empty (Energy 0)
+
+-- setup Enemy
+setEnemyState :: EntityState
+setEnemyState = Alive
+
+setEnemyHealth :: Health
+setEnemyHealth = Health 100
+
+setEnemyPosition :: (Float, Float)
+setEnemyPosition = (700, 0)
+
+setEnemyMovement :: (Float, Float)
+setEnemyMovement = (-20, 0)
+
+setEnemyType :: EnemyType
+setEnemyType = Soldier (Health 100) (Energy 10)
+
 
 -- get functies voor Player
 getPlayerState :: Player -> EntityState

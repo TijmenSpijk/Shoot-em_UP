@@ -3,7 +3,8 @@ module State where
 import Entities
 
 data Game = Game {
-    player :: Player
+    player :: Player,
+    enemies :: Enemy
 } 
 
 initialState :: Game
@@ -13,5 +14,13 @@ initialState = Game {
         playerHealth = baseHealth, 
         playerPosition = startingPoint, 
         playerMovement = baseMovement,
-        powerUp = basePowerUp}   
+        powerUp = basePowerUp},
+    enemies = [enemy1]   
 }
+    where enemy1 = Enemy {
+            enemyState = setEnemyState,
+            enemyHealth = setEnemyHealth,
+            enemyPosition = setEnemyPosition,
+            enemyMovement = setEnemyMovement,
+            enemyType = setEnemyType
+    }
