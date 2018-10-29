@@ -38,7 +38,7 @@ initialState = Game {
                           enemyType = setEnemyType}
           enemy2 = Enemy {enemyState = setEnemyState,
                           enemyHealth = setEnemyHealth,
-                          enemyPosition = (700, 100),
+                          enemyPosition = setEnemyPosition,
                           enemyMovement = setEnemyMovement,
                           enemyType = setEnemyType}
 

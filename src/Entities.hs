@@ -1,5 +1,7 @@
 module Entities where
 
+import System.Random
+
 data Player = Player {
     playerState :: EntityState,
     playerHealth :: Health,
@@ -64,7 +66,8 @@ setEnemyHealth :: Health
 setEnemyHealth = Health 100
 
 setEnemyPosition :: (Float, Float)
-setEnemyPosition = (700, 0)
+setEnemyPosition = (700, y)
+    where y = 0
 
 setEnemyMovement :: (Float, Float)
 setEnemyMovement = (-100, 0)
