@@ -9,9 +9,9 @@ import Graphics.Gloss.Data.ViewPort
 moveEntities :: Float -> Game -> Game
 moveEntities seconds game = case gameState game of
     Play -> game {player = movePlayer seconds (player game),
-                  enemies = map (moveEnemy seconds) (enemies game)}
-    Pause -> game
-    
+                  enemies = map (moveEnemy seconds) (enemies game),
+                  bullets = map (moveBullet seconds) (bullets game)}
+    Pause -> game    
                                 
 movePlayer :: Float -> Player -> Player
 movePlayer seconds player = 
@@ -44,6 +44,15 @@ moveEnemy seconds enemy =
             False -> x + vx * seconds                                                
           y' = y                                                       
 
+moveBullet :: Float -> Bullet -> Bullet
+moveBullet seconds bullet = 
+        Bullet {bulletPosition = (x', y'),
+                bulletMovement = (vx, vy)}
+    where (x, y) = getBulletPosition bullet
+          (vx, vy) = getBulletMovement bullet
+          x' = x + vx * seconds
+          y' = y 
+
 handleAllKeys :: Event -> Game -> Game
 handleAllKeys (EventKey (Char 'p') _ _ _) game = case gameState game of 
     Play -> game {gameState = Pause}
@@ -67,11 +76,5 @@ handleKeys (EventKey (Char 's') _ _ _) game =
                 playerPosition = getPlayerPosition (player game),
                 playerMovement = (0, -100),
                 powerUp = getPlayerPowerUp (player game)}}
-handleKeys (EventKey (SpecialKey KeySpace) _ _ _) game = 
-    game {player = 
-        Player {playerState = getPlayerState (player game),
-                playerHealth = getPlayerHealth (player game),
-                playerPosition = getPlayerPosition (player game),
-                playerMovement = (0, 0),
-                powerUp = getPlayerPowerUp (player game)}}
+handleKeys (EventKey (SpecialKey KeySpace) _ _ _) game = makeBullets game
 handleKeys _ game = game

@@ -16,6 +16,11 @@ data Enemy = Enemy {
     enemyType :: EnemyType
 }
 
+data Bullet = Bullet {
+    bulletPosition :: (Float, Float),
+    bulletMovement :: (Float, Float)
+}
+
 data EnemyType = Soldier Health Energy
                | Heavy Health Energy
                | Runner Health Energy
@@ -47,6 +52,9 @@ baseMovement = (0, 0)
 
 basePowerUp :: PowerUp
 basePowerUp = Empty (Energy 0)
+
+baseBulletMovement :: (Float, Float)
+baseBulletMovement = (150, 0)
 
 -- setup Enemy
 setEnemyState :: EntityState
@@ -97,7 +105,11 @@ getEnemyMovement enemy = enemyMovement enemy
 getEnemyType :: Enemy -> EnemyType
 getEnemyType enemy = enemyType enemy
 
--- creëer enemies
---spawnEnemies :: Float -> Game -> Game
---spawnEnemies = createEnemy
+-- get functies voor Bullets
+getBulletPosition :: Bullet -> (Float, Float)
+getBulletPosition bullet = bulletPosition bullet
+
+getBulletMovement :: Bullet -> (Float, Float)
+getBulletMovement bullet = bulletMovement bullet
+
 

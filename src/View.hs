@@ -5,9 +5,10 @@ import Entities
 import Graphics.Gloss
 
 render :: Game -> Picture
-render game = pictures (players : enemiess)
+render game = pictures (players : (enemiess ++ bulletss))
     where players = renderPlayer (player game)
           enemiess = map renderEnemy (enemies game)
+          bulletss = map renderBullet (bullets game)
 
 renderPlayer :: Player -> Picture
 renderPlayer player = uncurry translate (playerLocation) $ color playerColor $ circleSolid 10
@@ -15,10 +16,14 @@ renderPlayer player = uncurry translate (playerLocation) $ color playerColor $ c
           playerLocation = getPlayerPosition player
 
 renderEnemy :: Enemy -> Picture
-renderEnemy enemy = uncurry translate (enemyLocation) $ color enemyColor $ circleSolid 12
-    
+renderEnemy enemy = uncurry translate (enemyLocation) $ color enemyColor $ circleSolid 12    
     where enemyColor = light blue
           enemyLocation = getEnemyPosition enemy
+
+renderBullet :: Bullet -> Picture
+renderBullet bullet = uncurry translate (bulletLocation) $ color bulletColor $ rectangleSolid 8 2
+    where bulletColor = light green
+          bulletLocation = getBulletPosition bullet
 
 fps :: Int
 fps = 60
