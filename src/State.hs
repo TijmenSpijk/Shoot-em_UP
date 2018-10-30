@@ -7,9 +7,10 @@ data Game = Game {
     player :: Player,
     bullets :: [Bullet],
     enemies :: [Enemy],
-    buttonW :: ButtonState,
+    buttonW :: ButtonState, 
     buttonS :: ButtonState,
     buttonP :: ButtonState,
+    buttonSpace :: ButtonState,
     spawnTime :: Float
 }
 
@@ -30,7 +31,7 @@ initialState = Game {
         powerUp = basePowerUp},
     enemies = [],
     bullets = [],
-    buttonW = Off, buttonS = Off, buttonP = Off,
+    buttonW = Off, buttonS = Off, buttonP = Off, buttonSpace = Off,
     spawnTime = 0
 }
     where enemy1 = Enemy {enemyState = setEnemyState,

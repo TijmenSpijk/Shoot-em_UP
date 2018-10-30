@@ -68,23 +68,47 @@ handleAllKeys (EventKey (Char 'p') _ _ _) game = case gameState game of
     Play -> game {gameState = Pause}
     Pause -> game {gameState = Play}
 handleAllKeys event game = case gameState game of 
-    Play -> handleKeys event game
+    Play -> case event of
+        EventKey (Char 'w') _ _ _ -> case buttonW game of
+            On -> handleKeys event game {buttonW = Off}
+            Off -> handleKeys event game {buttonW = On}
+        EventKey (Char 's') _ _ _ -> case buttonS game of
+            On -> handleKeys event game {buttonS = Off}
+            Off -> handleKeys event game {buttonS = On}
+        EventKey (SpecialKey KeySpace) _ _ _ -> case buttonSpace game of
+            On -> handleKeys event game {buttonSpace = Off}
+            Off -> handleKeys event game {buttonSpace = On}
+        event -> game
     Pause -> game
 
 handleKeys :: Event -> Game -> Game
-handleKeys (EventKey (Char 'w') _ _ _) game = 
-    game {player = 
-        Player {playerState = getPlayerState (player game),
-                playerHealth = getPlayerHealth (player game),
-                playerPosition = getPlayerPosition (player game),
-                playerMovement = (0, 100),
-                powerUp = getPlayerPowerUp (player game)}}
-handleKeys (EventKey (Char 's') _ _ _) game = 
-    game {player = 
-        Player {playerState = getPlayerState (player game),
-                playerHealth = getPlayerHealth (player game),
-                playerPosition = getPlayerPosition (player game),
-                playerMovement = (0, -100),
-                powerUp = getPlayerPowerUp (player game)}}
-handleKeys (EventKey (SpecialKey KeySpace) _ _ _) game = makeBullets game
+handleKeys (EventKey (Char 'w') _ _ _) game = case buttonW game of
+    On -> game {player = 
+            Player {playerState = getPlayerState (player game),
+                    playerHealth = getPlayerHealth (player game),
+                    playerPosition = getPlayerPosition (player game),
+                    playerMovement = (0, 100),
+                    powerUp = getPlayerPowerUp (player game)}}
+    Off -> game {player = 
+            Player {playerState = getPlayerState (player game),
+                    playerHealth = getPlayerHealth (player game),
+                    playerPosition = getPlayerPosition (player game),
+                    playerMovement = (0, 0),
+                    powerUp = getPlayerPowerUp (player game)}}
+handleKeys (EventKey (Char 's') _ _ _) game = case buttonS game of
+    On -> game {player = 
+            Player {playerState = getPlayerState (player game),
+                    playerHealth = getPlayerHealth (player game),
+                    playerPosition = getPlayerPosition (player game),
+                    playerMovement = (0, -100),
+                    powerUp = getPlayerPowerUp (player game)}}
+    Off -> game {player = 
+            Player {playerState = getPlayerState (player game),
+                    playerHealth = getPlayerHealth (player game),
+                    playerPosition = getPlayerPosition (player game),
+                    playerMovement = (0, 0),
+                    powerUp = getPlayerPowerUp (player game)}}
+handleKeys (EventKey (SpecialKey KeySpace) _ _ _) game = case buttonSpace game of
+    On -> makeBullets game
+    Off -> game
 handleKeys _ game = game
