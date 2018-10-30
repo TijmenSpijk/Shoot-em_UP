@@ -7,10 +7,6 @@ data Game = Game {
     player :: Player,
     bullets :: [Bullet],
     enemies :: [Enemy],
-    buttonW :: ButtonState, 
-    buttonS :: ButtonState,
-    buttonP :: ButtonState,
-    buttonSpace :: ButtonState,
     spawnTime :: Float,
     spawnRate :: Float
 }
@@ -31,7 +27,6 @@ initialState = Game {
         playerMovement = baseMovement,
         powerUp = basePowerUp},
     enemies = [], bullets = [],
-    buttonW = Off, buttonS = Off, buttonP = Off, buttonSpace = Off,
     spawnTime = 0, spawnRate = 3
 }
 
@@ -43,7 +38,7 @@ makeBullets game = game {bullets = newBullet : bulletsList}
           bulletsList = bullets game
 
 makeEnemies :: Float -> Float -> Game -> Game
-makeEnemies seconds randomnumber game   | spawnTime game > 1 = case gameState game of
+makeEnemies seconds randomnumber game   | spawnTime game > spawnRate game = case gameState game of
                                             Play -> game {enemies = newEnemy:enemyList, spawnTime = 0}
                                             Pause -> game 
                                         | otherwise = case gameState game of
