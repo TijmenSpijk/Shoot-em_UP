@@ -64,51 +64,42 @@ input :: Event -> Game -> IO Game
 input event game = return (handleAllKeys event game)
 
 handleAllKeys :: Event -> Game -> Game
-handleAllKeys (EventKey (Char 'p') _ _ _) game = case gameState game of 
+handleAllKeys (EventKey (Char 'p') Down _ _) game = case gameState game of 
     Play -> game {gameState = Pause}
     Pause -> game {gameState = Play}
 handleAllKeys event game = case gameState game of 
-    Play -> case event of
-        EventKey (Char 'w') _ _ _ -> case buttonW game of
-            On -> handleKeys event game {buttonW = Off}
-            Off -> handleKeys event game {buttonW = On}
-        EventKey (Char 's') _ _ _ -> case buttonS game of
-            On -> handleKeys event game {buttonS = Off}
-            Off -> handleKeys event game {buttonS = On}
-        EventKey (SpecialKey KeySpace) _ _ _ -> case buttonSpace game of
-            On -> handleKeys event game {buttonSpace = Off}
-            Off -> handleKeys event game {buttonSpace = On}
-        event -> game
+    Play -> handleKeys event game
     Pause -> game
 
 handleKeys :: Event -> Game -> Game
-handleKeys (EventKey (Char 'w') _ _ _) game = case buttonW game of
-    On -> game {player = 
+handleKeys (EventKey (Char 'w') Down _ _) game =
+    game {player = 
             Player {playerState = getPlayerState (player game),
                     playerHealth = getPlayerHealth (player game),
                     playerPosition = getPlayerPosition (player game),
                     playerMovement = (0, 100),
                     powerUp = getPlayerPowerUp (player game)}}
-    Off -> game {player = 
+handleKeys (EventKey (Char 'w') Up _ _) game =
+    game {player = 
             Player {playerState = getPlayerState (player game),
                     playerHealth = getPlayerHealth (player game),
                     playerPosition = getPlayerPosition (player game),
                     playerMovement = (0, 0),
                     powerUp = getPlayerPowerUp (player game)}}
-handleKeys (EventKey (Char 's') _ _ _) game = case buttonS game of
-    On -> game {player = 
+handleKeys (EventKey (Char 's') Down _ _) game =
+    game {player = 
             Player {playerState = getPlayerState (player game),
                     playerHealth = getPlayerHealth (player game),
                     playerPosition = getPlayerPosition (player game),
                     playerMovement = (0, -100),
                     powerUp = getPlayerPowerUp (player game)}}
-    Off -> game {player = 
+handleKeys (EventKey (Char 's') Up _ _) game =
+    game {player = 
             Player {playerState = getPlayerState (player game),
                     playerHealth = getPlayerHealth (player game),
                     playerPosition = getPlayerPosition (player game),
                     playerMovement = (0, 0),
                     powerUp = getPlayerPowerUp (player game)}}
-handleKeys (EventKey (SpecialKey KeySpace) _ _ _) game = case buttonSpace game of
-    On -> makeBullets game
-    Off -> game
+handleKeys (EventKey (SpecialKey KeySpace) Down _ _) game = makeBullets game
+handleKeys (EventKey (SpecialKey KeySpace) Up _ _) game = game    
 handleKeys _ game = game

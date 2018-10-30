@@ -11,7 +11,8 @@ data Game = Game {
     buttonS :: ButtonState,
     buttonP :: ButtonState,
     buttonSpace :: ButtonState,
-    spawnTime :: Float
+    spawnTime :: Float,
+    spawnRate :: Float
 }
 
 data GameState = Pause
@@ -29,21 +30,10 @@ initialState = Game {
         playerPosition = startingPoint, 
         playerMovement = baseMovement,
         powerUp = basePowerUp},
-    enemies = [],
-    bullets = [],
+    enemies = [], bullets = [],
     buttonW = Off, buttonS = Off, buttonP = Off, buttonSpace = Off,
-    spawnTime = 0
+    spawnTime = 0, spawnRate = 3
 }
-    where enemy1 = Enemy {enemyState = setEnemyState,
-                          enemyHealth = setEnemyHealth,
-                          enemyPosition = setEnemyPosition 20,
-                          enemyMovement = setEnemyMovement,
-                          enemyType = setEnemyType}
-          enemy2 = Enemy {enemyState = setEnemyState,
-                          enemyHealth = setEnemyHealth,
-                          enemyPosition = setEnemyPosition (-20),
-                          enemyMovement = setEnemyMovement,
-                          enemyType = setEnemyType}
 
 -- Creation of Entities
 makeBullets :: Game -> Game
@@ -53,9 +43,12 @@ makeBullets game = game {bullets = newBullet : bulletsList}
           bulletsList = bullets game
 
 makeEnemies :: Float -> Float -> Game -> Game
-makeEnemies seconds randomnumber game   | spawnTime game > 1 = game {enemies = newEnemy:enemyList,
-                                                                      spawnTime = 0}
-                                        | otherwise = game {spawnTime = spawnTime game + seconds}
+makeEnemies seconds randomnumber game   | spawnTime game > 1 = case gameState game of
+                                            Play -> game {enemies = newEnemy:enemyList, spawnTime = 0}
+                                            Pause -> game 
+                                        | otherwise = case gameState game of
+                                            Play -> game {spawnTime = spawnTime game + seconds}
+                                            Pause -> game
     where
         newEnemy = Enemy {  enemyState = setEnemyState,
                             enemyHealth = setEnemyHealth,
