@@ -4,8 +4,11 @@ import State
 import Entities
 import Graphics.Gloss
 
-render :: Game -> Picture
-render game = pictures (players : (enemiess ++ bulletss))
+render :: Game -> IO Picture
+render game = return (renderPure game)
+
+renderPure :: Game -> Picture
+renderPure game = pictures (players : (enemiess ++ bulletss))
     where players = renderPlayer (player game)
           enemiess = map renderEnemy (enemies game)
           bulletss = map renderBullet (bullets game)

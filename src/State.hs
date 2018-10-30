@@ -9,7 +9,8 @@ data Game = Game {
     enemies :: [Enemy],
     buttonW :: ButtonState,
     buttonS :: ButtonState,
-    buttonP :: ButtonState
+    buttonP :: ButtonState,
+    spawnTime :: Float
 }
 
 data GameState = Pause
@@ -27,18 +28,19 @@ initialState = Game {
         playerPosition = startingPoint, 
         playerMovement = baseMovement,
         powerUp = basePowerUp},
-    enemies = [enemy1, enemy2],
+    enemies = [],
     bullets = [],
-    buttonW = Off, buttonS = Off, buttonP = Off
+    buttonW = Off, buttonS = Off, buttonP = Off,
+    spawnTime = 0
 }
     where enemy1 = Enemy {enemyState = setEnemyState,
                           enemyHealth = setEnemyHealth,
-                          enemyPosition = setEnemyPosition,
+                          enemyPosition = setEnemyPosition 20,
                           enemyMovement = setEnemyMovement,
                           enemyType = setEnemyType}
           enemy2 = Enemy {enemyState = setEnemyState,
                           enemyHealth = setEnemyHealth,
-                          enemyPosition = setEnemyPosition,
+                          enemyPosition = setEnemyPosition (-20),
                           enemyMovement = setEnemyMovement,
                           enemyType = setEnemyType}
 
@@ -48,3 +50,15 @@ makeBullets game = game {bullets = newBullet : bulletsList}
     where newBullet = Bullet {bulletPosition = getPlayerPosition (player game),
                               bulletMovement = baseBulletMovement}
           bulletsList = bullets game
+
+makeEnemies :: Float -> Float -> Game -> Game
+makeEnemies seconds randomnumber game   | spawnTime game > 1 = game {enemies = newEnemy:enemyList,
+                                                                      spawnTime = 0}
+                                        | otherwise = game {spawnTime = spawnTime game + seconds}
+    where
+        newEnemy = Enemy {  enemyState = setEnemyState,
+                            enemyHealth = setEnemyHealth,
+                            enemyPosition = setEnemyPosition randomnumber,
+                            enemyMovement = setEnemyMovement,
+                            enemyType = setEnemyType}
+        enemyList = enemies game

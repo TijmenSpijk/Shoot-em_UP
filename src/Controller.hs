@@ -2,9 +2,15 @@ module Controller where
 
 import State
 import Entities
+import System.Random
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game
 import Graphics.Gloss.Data.ViewPort
+
+step :: Float -> Game -> IO Game
+step seconds game =  do
+    randomnumber <- getStdRandom (randomR (-350,350))
+    return $ moveEntities seconds (makeEnemies seconds randomnumber game)
 
 moveEntities :: Float -> Game -> Game
 moveEntities seconds game = case gameState game of
@@ -52,6 +58,10 @@ moveBullet seconds bullet =
           (vx, vy) = getBulletMovement bullet
           x' = x + vx * seconds
           y' = y 
+
+
+input :: Event -> Game -> IO Game
+input event game = return (handleAllKeys event game)
 
 handleAllKeys :: Event -> Game -> Game
 handleAllKeys (EventKey (Char 'p') _ _ _) game = case gameState game of 
