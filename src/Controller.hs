@@ -9,7 +9,7 @@ import Graphics.Gloss.Data.ViewPort
 
 step :: Float -> Game -> IO Game
 step seconds game =  do
-    randomnumber <- getStdRandom (randomR (-350,350))
+    randomnumber <- getStdRandom (randomR (-350,300))
     return $ moveEntities seconds (makeEnemies seconds randomnumber game)
 
 moveEntities :: Float -> Game -> Game
@@ -34,7 +34,7 @@ movePlayer seconds player =
           y' = case p of
             True -> y + vy * seconds
             False -> y - (0.05 * vy)
-          p = snd(getPlayerPosition player) <= 345 && snd(getPlayerPosition player) >= -345
+          p = snd(getPlayerPosition player) <= 300 && snd(getPlayerPosition player) >= -345
 
 moveEnemy :: Float -> Enemy -> Enemy
 moveEnemy seconds enemy = 
@@ -100,6 +100,5 @@ handleKeys (EventKey (Char 's') Up _ _) game =
                     playerPosition = getPlayerPosition (player game),
                     playerMovement = (0, 0),
                     powerUp = getPlayerPowerUp (player game)}}
-handleKeys (EventKey (SpecialKey KeySpace) Down _ _) game = makeBullets game
-handleKeys (EventKey (SpecialKey KeySpace) Up _ _) game = game    
+handleKeys (EventKey (SpecialKey KeySpace) Down _ _) game = makeBullets game  
 handleKeys _ game = game

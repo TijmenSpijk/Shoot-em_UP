@@ -4,6 +4,8 @@ import Entities
 
 data Game = Game {
     gameState :: GameState,
+    score :: Int,
+    energy :: Int,
     player :: Player,
     bullets :: [Bullet],
     enemies :: [Enemy],
@@ -14,12 +16,10 @@ data Game = Game {
 data GameState = Pause
                | Play
 
-data ButtonState = On
-                 | Off
-
 initialState :: Game
 initialState = Game {
     gameState = Play,
+    score = 1234, energy = 1234,
     player = Player {
         playerState = Alive, 
         playerHealth = baseHealth, 
@@ -27,7 +27,7 @@ initialState = Game {
         playerMovement = baseMovement,
         powerUp = basePowerUp},
     enemies = [], bullets = [],
-    spawnTime = 0, spawnRate = 3
+    spawnTime = 0, spawnRate = 1
 }
 
 -- Creation of Entities
