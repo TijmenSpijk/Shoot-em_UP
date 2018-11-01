@@ -10,7 +10,7 @@ import Graphics.Gloss.Data.ViewPort
 step :: Float -> Game -> IO Game
 step seconds game =  do
     randomnumber <- getStdRandom (randomR (-350,300))
-    return $ moveEntities seconds (makeEnemies seconds randomnumber game)
+    return $ detectCollisions (moveEntities seconds (makeEnemies seconds randomnumber game))
 
 moveEntities :: Float -> Game -> Game
 moveEntities seconds game = case gameState game of
@@ -79,7 +79,7 @@ handleKeys (EventKey (Char 'w') Down _ _) game =
                     playerPosition = getPlayerPosition (player game),
                     playerMovement = (0, 100),
                     powerUp = getPlayerPowerUp (player game)}}
-handleKeys (EventKey (Char 'w') Up _ _) game =
+handleKeys (EventKey (Char 'w') Up _ _) game = 
     game {player = 
             Player {playerState = getPlayerState (player game),
                     playerHealth = getPlayerHealth (player game),
@@ -102,3 +102,68 @@ handleKeys (EventKey (Char 's') Up _ _) game =
                     powerUp = getPlayerPowerUp (player game)}}
 handleKeys (EventKey (SpecialKey KeySpace) Down _ _) game = makeBullets game  
 handleKeys _ game = game
+
+-- Collisions
+detectCollisions :: Game -> Game
+detectCollisions game = game {bullets = bulletList, enemies = enemyList}
+    where enemyList  = detectEnemyCollisions  (bullets game) (enemies game)
+          bulletList = detectBulletCollisions (bullets game) (enemies game)
+
+detectBulletCollisions :: [Bullet] -> [Enemy] -> [Bullet]
+detectBulletCollisions [] _ = []
+detectBulletCollisions bulletList [] = bulletList
+detectBulletCollisions (bullet:bulletRest) enemyList = (detectBulletCollision bullet enemyList) : (detectBulletCollisions bulletRest enemyList)
+
+detectBulletCollision :: Bullet -> [Enemy] -> Bullet
+detectBulletCollision bullet [] = bullet
+detectBulletCollision bullet [x] | detectRealCollision bullet x = Bullet       {bulletPosition = getBulletPosition bullet,
+                                                                                bulletMovement = baseBulletMovement,
+                                                                                bulletCollide  = True}
+                                 | otherwise = bullet 
+detectBulletCollision bullet (x:rest) | detectRealCollision bullet x = Bullet  {bulletPosition = getBulletPosition bullet,
+                                                                                bulletMovement = baseBulletMovement,
+                                                                                bulletCollide  = True}
+                                      | otherwise = detectBulletCollision bullet rest
+
+detectEnemyCollisions :: [Bullet] -> [Enemy] -> [Enemy]
+detectEnemyCollisions _ [] = []
+detectEnemyCollisions [] enemyList = enemyList
+detectEnemyCollisions bulletList (enemy:enemyRest) = (detectEnemyCollision bulletList enemy) : (detectEnemyCollisions bulletList enemyRest)
+
+detectEnemyCollision :: [Bullet] -> Enemy -> Enemy
+detectEnemyCollision [] enemy = enemy
+detectEnemyCollision [x] enemy | detectRealCollision x enemy = Enemy {enemyState = Dead,
+                                                                      enemyHealth = getEnemyHealth enemy,
+                                                                      enemyPosition = getEnemyPosition enemy,
+                                                                      enemyMovement = getEnemyMovement enemy,
+                                                                      enemyType = getEnemyType enemy}
+                               | otherwise = enemy
+detectEnemyCollision (x:rest) enemy | detectRealCollision x enemy = Enemy {enemyState = Dead,
+                                                                           enemyHealth = getEnemyHealth enemy,
+                                                                           enemyPosition = getEnemyPosition enemy,
+                                                                           enemyMovement = getEnemyMovement enemy,
+                                                                           enemyType = getEnemyType enemy}
+                                    | otherwise = detectEnemyCollision rest enemy                                       
+
+detectRealCollision :: Bullet -> Enemy -> Bool 
+detectRealCollision bullet enemy        | (bulletYplus <= enemyYmin) && (bulletYplus >= enemyYplus) && (bulletXplus >= enemyXmin) && (bulletXplus <= enemyXplus) = True
+                                        | (bulletYmin <= enemyYplus) && (bulletYmin >= enemyYmin) && (bulletXplus >= enemyXmin) && (bulletXplus <= enemyXplus) = True
+                                        | otherwise = False                                                                                                                                                                                        
+        where   bulletYplus = snd (bulletPosition bullet) +1
+                bulletYmin = snd (bulletPosition bullet) -1
+                enemyYplus = snd (enemyPosition enemy) +5
+                enemyYmin = snd (enemyPosition enemy) -5
+                enemyXplus = fst (enemyPosition enemy) +5
+                enemyXmin = fst (enemyPosition enemy) -5
+                bulletXplus = fst (bulletPosition bullet) +4
+
+checkDead :: Game -> Game
+checkDead game = game {bullets = bulletList, enemies = enemyList}
+    where bulletList = finalBulletList (bullets game)
+          enemyList  = finalEnemyList  (enemies game)
+
+finalBulletList :: [Bullet] -> [Bullet]
+
+finalEnemyList :: [Enemy] -> [Enemy]
+finalEnemyList [] = []
+finalEnemyList                                

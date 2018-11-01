@@ -18,7 +18,8 @@ data Enemy = Enemy {
 
 data Bullet = Bullet {
     bulletPosition :: (Float, Float),
-    bulletMovement :: (Float, Float)
+    bulletMovement :: (Float, Float),
+    bulletCollide :: Bool
 }
 
 data EnemyType = Soldier Health Energy
@@ -111,3 +112,6 @@ getBulletPosition bullet = bulletPosition bullet
 
 getBulletMovement :: Bullet -> (Float, Float)
 getBulletMovement bullet = bulletMovement bullet
+
+getBulletCollide :: Bullet -> Bool
+getBulletCollide bullet = bulletCollide bullet

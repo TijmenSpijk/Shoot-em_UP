@@ -34,7 +34,8 @@ initialState = Game {
 makeBullets :: Game -> Game
 makeBullets game = game {bullets = newBullet : bulletsList}
     where newBullet = Bullet {bulletPosition = getPlayerPosition (player game),
-                              bulletMovement = baseBulletMovement}
+                              bulletMovement = baseBulletMovement,
+                              bulletCollide  = False}
           bulletsList = bullets game
 
 makeEnemies :: Float -> Float -> Game -> Game
