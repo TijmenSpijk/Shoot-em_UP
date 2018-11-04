@@ -10,7 +10,7 @@ import Graphics.Gloss.Data.ViewPort
 step :: Float -> Game -> IO Game
 step seconds game =  do
     randomnumber <- getStdRandom (randomR (-350,300))
-    return $ detectCollisions (moveEntities seconds (makeEnemies seconds randomnumber game))
+    return $ checkDead $ detectCollisions $ moveEntities seconds $ makeEnemies seconds randomnumber game
 
 moveEntities :: Float -> Game -> Game
 moveEntities seconds game = case gameState game of
@@ -53,7 +53,8 @@ moveEnemy seconds enemy =
 moveBullet :: Float -> Bullet -> Bullet
 moveBullet seconds bullet = 
         Bullet {bulletPosition = (x', y'),
-                bulletMovement = (vx, vy)}
+                bulletMovement = (vx, vy),
+                bulletCollide = getBulletCollide bullet}
     where (x, y) = getBulletPosition bullet
           (vx, vy) = getBulletMovement bullet
           x' = x + vx * seconds
@@ -112,6 +113,7 @@ detectCollisions game = game {bullets = bulletList, enemies = enemyList}
 detectBulletCollisions :: [Bullet] -> [Enemy] -> [Bullet]
 detectBulletCollisions [] _ = []
 detectBulletCollisions bulletList [] = bulletList
+detectBulletCollisions [bullet] enemyList = [detectBulletCollision bullet enemyList]
 detectBulletCollisions (bullet:bulletRest) enemyList = (detectBulletCollision bullet enemyList) : (detectBulletCollisions bulletRest enemyList)
 
 detectBulletCollision :: Bullet -> [Enemy] -> Bullet
@@ -128,6 +130,7 @@ detectBulletCollision bullet (x:rest) | detectRealCollision bullet x = Bullet  {
 detectEnemyCollisions :: [Bullet] -> [Enemy] -> [Enemy]
 detectEnemyCollisions _ [] = []
 detectEnemyCollisions [] enemyList = enemyList
+detectEnemyCollisions bulletList [enemy] = [detectEnemyCollision bulletList enemy]
 detectEnemyCollisions bulletList (enemy:enemyRest) = (detectEnemyCollision bulletList enemy) : (detectEnemyCollisions bulletList enemyRest)
 
 detectEnemyCollision :: [Bullet] -> Enemy -> Enemy
@@ -149,12 +152,12 @@ detectRealCollision :: Bullet -> Enemy -> Bool
 detectRealCollision bullet enemy        | (bulletYplus <= enemyYmin) && (bulletYplus >= enemyYplus) && (bulletXplus >= enemyXmin) && (bulletXplus <= enemyXplus) = True
                                         | (bulletYmin <= enemyYplus) && (bulletYmin >= enemyYmin) && (bulletXplus >= enemyXmin) && (bulletXplus <= enemyXplus) = True
                                         | otherwise = False                                                                                                                                                                                        
-        where   bulletYplus = snd (bulletPosition bullet) +1
-                bulletYmin = snd (bulletPosition bullet) -1
-                enemyYplus = snd (enemyPosition enemy) +5
-                enemyYmin = snd (enemyPosition enemy) -5
-                enemyXplus = fst (enemyPosition enemy) +5
-                enemyXmin = fst (enemyPosition enemy) -5
+        where   bulletYplus = snd (bulletPosition bullet) +2
+                bulletYmin = snd (bulletPosition bullet) -2
+                enemyYplus = snd (enemyPosition enemy) +10
+                enemyYmin = snd (enemyPosition enemy) -10
+                enemyXplus = fst (enemyPosition enemy) +10
+                enemyXmin = fst (enemyPosition enemy) -10
                 bulletXplus = fst (bulletPosition bullet) +4
 
 checkDead :: Game -> Game
@@ -163,7 +166,19 @@ checkDead game = game {bullets = bulletList, enemies = enemyList}
           enemyList  = finalEnemyList  (enemies game)
 
 finalBulletList :: [Bullet] -> [Bullet]
+finalBulletList [] = []
+finalBulletList [bullet] | not (bulletCollide bullet) = [bullet]
+                         | otherwise = []
+finalBulletList (bullet:rest) | not (bulletCollide bullet) = bullet : finalBulletList rest
+                              | otherwise = finalBulletList rest
 
 finalEnemyList :: [Enemy] -> [Enemy]
 finalEnemyList [] = []
-finalEnemyList                                
+finalEnemyList [enemy] | x < (-640) = []
+                       | otherwise = case enemyState enemy of
+        Alive -> [enemy]
+        Dead -> []
+    where x = fst (enemyPosition enemy)
+finalEnemyList (enemy:rest) = case enemyState enemy of
+    Alive -> enemy : finalEnemyList rest
+    Dead -> finalEnemyList rest
