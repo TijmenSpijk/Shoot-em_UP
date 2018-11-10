@@ -8,10 +8,10 @@ render :: Game -> IO Picture
 render game = return (renderPure game)
 
 renderPure :: Game -> Picture
-renderPure game = pictures (menu' : score' : energy' : player' : (enemies' ++ bullets'))
+renderPure game = pictures (menu' : score' : health' : player' : (enemies' ++ bullets'))
     where player' = renderPlayer (player game)
           score' = (renderScore (score game))
-          energy' = (renderEnergy (energy game))
+          health' = (renderHealth (getPlayerHealth (player game)))
           enemies' = map renderEnemy (enemies game)
           bullets' = map renderBullet (bullets game)
           menu' = renderMenu
@@ -41,10 +41,10 @@ renderScore score = uncurry translate (scoreLocation) $ scale 0.2 0.2 $ color sc
     where scoreColor = black
           scoreLocation = (-620, 330)
 
-renderEnergy :: Int -> Picture
-renderEnergy energy = uncurry translate (energyLocation) $ scale 0.2 0.2 $ color energyColor $ text ("Energy: " ++ show energy)
-    where energyColor = black
-          energyLocation = (450, 330)
+renderHealth :: Health -> Picture
+renderHealth health = uncurry translate (healthLocation) $ scale 0.2 0.2 $ color healthColor $ text (show health)
+    where healthColor = black
+          healthLocation = (475, 330)
 
 fps :: Int
 fps = 60

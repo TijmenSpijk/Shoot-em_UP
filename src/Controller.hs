@@ -10,7 +10,7 @@ import Graphics.Gloss.Data.ViewPort
 step :: Float -> Game -> IO Game
 step seconds game =  do
     randomnumber <- getStdRandom (randomR (-350,300))
-    return $ checkDead $ detectCollisions $ moveEntities seconds $ makeEnemies seconds randomnumber game
+    return $ checkSpawn $ checkDead $ detectCollisions $ moveEntities seconds $ makeEnemies seconds randomnumber game
 
 moveEntities :: Float -> Game -> Game
 moveEntities seconds game = case gameState game of
@@ -149,9 +149,9 @@ detectEnemyCollision (x:rest) enemy | detectRealCollision x enemy = Enemy {enemy
                                     | otherwise = detectEnemyCollision rest enemy                                       
 
 detectRealCollision :: Bullet -> Enemy -> Bool 
-detectRealCollision bullet enemy        | (bulletYplus <= enemyYmin) && (bulletYplus >= enemyYplus) && (bulletXplus >= enemyXmin) && (bulletXplus <= enemyXplus) = True
-                                        | (bulletYmin <= enemyYplus) && (bulletYmin >= enemyYmin) && (bulletXplus >= enemyXmin) && (bulletXplus <= enemyXplus) = True
-                                        | otherwise = False                                                                                                                                                                                        
+detectRealCollision bullet enemy | (bulletYplus <= enemyYmin) && (bulletYplus >= enemyYplus) && (bulletXplus >= enemyXmin) && (bulletXplus <= enemyXplus) = True
+                                 | (bulletYmin <= enemyYplus) && (bulletYmin >= enemyYmin) && (bulletXplus >= enemyXmin) && (bulletXplus <= enemyXplus) = True
+                                 | otherwise = False                                                                                                                                                                                        
         where   bulletYplus = snd (bulletPosition bullet) +2
                 bulletYmin = snd (bulletPosition bullet) -2
                 enemyYplus = snd (enemyPosition enemy) +10
@@ -160,10 +160,21 @@ detectRealCollision bullet enemy        | (bulletYplus <= enemyYmin) && (bulletY
                 enemyXmin = fst (enemyPosition enemy) -10
                 bulletXplus = fst (bulletPosition bullet) +4
 
+-- Score and Dead Enemies
 checkDead :: Game -> Game
-checkDead game = game {bullets = bulletList, enemies = enemyList}
-    where bulletList = finalBulletList (bullets game)
+checkDead game = game {bullets = bulletList, enemies = enemyList, score = newScore}
+    where newScore = calcScore (enemies game) (score game)
+          bulletList = finalBulletList (bullets game)
           enemyList  = finalEnemyList  (enemies game)
+          
+calcScore :: [Enemy] -> Int -> Int
+calcScore [] score = score
+calcScore [enemy] score = case enemyState enemy of
+    Alive -> score
+    Dead -> 100 + score
+calcScore (enemy:rest) score = case enemyState enemy of
+    Alive -> calcScore rest score
+    Dead -> 100 + calcScore rest score
 
 finalBulletList :: [Bullet] -> [Bullet]
 finalBulletList [] = []
@@ -182,3 +193,24 @@ finalEnemyList [enemy] | x < (-640) = []
 finalEnemyList (enemy:rest) = case enemyState enemy of
     Alive -> enemy : finalEnemyList rest
     Dead -> finalEnemyList rest
+
+checkSpawn :: Game -> Game
+checkSpawn game = game {spawnRate = newSpawnRate}
+    where newSpawnRate = calcSpawnRate (spawnRate game) (score game)
+
+calcSpawnRate :: Float -> Int -> Float
+calcSpawnRate _ 0 = 3
+calcSpawnRate _ 500  = 2.5
+calcSpawnRate _ 1000 = 2
+calcSpawnRate _ 1500 = 1.75
+calcSpawnRate _ 2000 = 1.5
+calcSpawnRate _ 2500 = 1.25
+calcSpawnRate _ 3000 = 0.875
+calcSpawnRate _ 3500 = 0.75
+calcSpawnRate _ 4000 = 0.625
+calcSpawnRate _ 4500 = 0.5
+calcSpawnRate _ 5000 = 0.375
+calcSpawnRate _ 5500 = 0.25
+calcSpawnRate _ 6000 = 0.125
+calcSpawnRate _ 7500 = 0.1
+calcSpawnRate spawnRate _ = spawnRate

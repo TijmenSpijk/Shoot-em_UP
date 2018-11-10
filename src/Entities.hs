@@ -27,6 +27,7 @@ data EnemyType = Soldier Health Energy
                | Runner Health Energy
 
 data Health = Health Int
+    deriving Show
 
 data EntityState = Alive
                   | Dead

@@ -5,7 +5,6 @@ import Entities
 data Game = Game {
     gameState :: GameState,
     score :: Int,
-    energy :: Int,
     player :: Player,
     bullets :: [Bullet],
     enemies :: [Enemy],
@@ -19,7 +18,7 @@ data GameState = Pause
 initialState :: Game
 initialState = Game {
     gameState = Play,
-    score = 1234, energy = 1234,
+    score = 0, 
     player = Player {
         playerState = Alive, 
         playerHealth = baseHealth, 
@@ -27,7 +26,7 @@ initialState = Game {
         playerMovement = baseMovement,
         powerUp = basePowerUp},
     enemies = [], bullets = [],
-    spawnTime = 0, spawnRate = 1
+    spawnTime = 0, spawnRate = 3
 }
 
 -- Creation of Entities
@@ -39,10 +38,10 @@ makeBullets game = game {bullets = newBullet : bulletsList}
           bulletsList = bullets game
 
 makeEnemies :: Float -> Float -> Game -> Game
-makeEnemies seconds randomnumber game   | spawnTime game > spawnRate game = case gameState game of
+makeEnemies seconds randomnumber game | spawnTime game > spawnRate game = case gameState game of
                                             Play -> game {enemies = newEnemy:enemyList, spawnTime = 0}
                                             Pause -> game 
-                                        | otherwise = case gameState game of
+                                      | otherwise = case gameState game of
                                             Play -> game {spawnTime = spawnTime game + seconds}
                                             Pause -> game
     where
