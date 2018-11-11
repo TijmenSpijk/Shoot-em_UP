@@ -10,7 +10,7 @@ import Graphics.Gloss.Data.ViewPort
 step :: Float -> Game -> IO Game
 step seconds game =  do
     randomnumber <- getStdRandom (randomR (-350,300))
-    return $ checkSpawn $ checkDead $ mapEnemyPlayerCollide $ detectCollisions $ moveEntities seconds $ makeEnemies seconds randomnumber game
+    return $ checkSpawn $ checkDeadPlayer $ collisionDetection $ moveEntities seconds $ makeEnemies seconds randomnumber game
 
 moveEntities :: Float -> Game -> Game
 moveEntities seconds game = case gameState game of
@@ -101,10 +101,14 @@ handleKeys (EventKey (Char 's') Up _ _) game =
                     playerPosition = getPlayerPosition (player game),
                     playerMovement = (0, 0),
                     powerUp = getPlayerPowerUp (player game)}}
+handleKeys (EventKey (Char 'r') Up _ _) game = initialState
 handleKeys (EventKey (SpecialKey KeySpace) Down _ _) game = makeBullets game  
 handleKeys _ game = game
 
 -- Collisions
+collisionDetection :: Game -> Game
+collisionDetection game = checkDeadEnemies $ enemyCollideWall $ enemyCollidePlayer $ detectCollisions game
+
 detectCollisions :: Game -> Game
 detectCollisions game = game {bullets = bulletList, enemies = enemyList}
     where enemyList  = detectEnemyCollisions  (bullets game) (enemies game)
@@ -149,7 +153,7 @@ detectEnemyCollision (x:rest) enemy | detectRealCollision x enemy = Enemy {enemy
                                     | otherwise = detectEnemyCollision rest enemy                                       
 
 detectRealCollision :: Bullet -> Enemy -> Bool 
-detectRealCollision bullet enemy | (bulletYplus <= enemyYmin) && (bulletYplus >= enemyYplus) && (bulletXplus >= enemyXmin) && (bulletXplus <= enemyXplus) = True
+detectRealCollision bullet enemy | (bulletYplus >= enemyYmin) && (bulletYplus <= enemyYplus) && (bulletXplus >= enemyXmin) && (bulletXplus <= enemyXplus) = True
                                  | (bulletYmin <= enemyYplus) && (bulletYmin >= enemyYmin) && (bulletXplus >= enemyXmin) && (bulletXplus <= enemyXplus) = True
                                  | otherwise = False                                                                                                                                                                                        
         where   bulletYplus = snd (bulletPosition bullet) +2
@@ -160,9 +164,86 @@ detectRealCollision bullet enemy | (bulletYplus <= enemyYmin) && (bulletYplus >=
                 enemyXmin = fst (enemyPosition enemy) -10
                 bulletXplus = fst (bulletPosition bullet) +4
 
+--Enemies collide with player and wall
+enemyCollideWall :: Game -> Game
+enemyCollideWall game | enemyCollide (enemies game) = game {player = Player { playerState = getPlayerState (player game),
+                                                                                playerHealth = calcPlayerDamage (player game),
+                                                                                playerPosition = getPlayerPosition (player game),
+                                                                                playerMovement = getPlayerMovement (player game),
+                                                                                powerUp = getPlayerPowerUp (player game)}}
+                      | otherwise = game
+
+enemyCollide :: [Enemy] -> Bool
+enemyCollide [] = False
+enemyCollide [x] | (fst (getEnemyPosition x) < -640) = True
+                 | otherwise = False
+enemyCollide (x:rest) | (fst (getEnemyPosition x) < -640) = True
+                      | otherwise = enemyCollide rest
+
+enemyCollidePlayer :: Game -> Game
+enemyCollidePlayer game = game {player = newPlayer, enemies = enemyList}
+    where temp = (playerCollide (player game) (enemies game))
+          newPlayer = fst temp
+          enemyList = snd temp
+
+playerCollide :: Player -> [Enemy] -> (Player, [Enemy])
+playerCollide player [] = (player, [])
+playerCollide player [enemy] | checkCollision player enemy = (newPlayer, [newEnemy])
+                             | otherwise = (player, [enemy])
+    where newPlayer = Player {playerState = getPlayerState player,
+                              playerHealth = calcPlayerDamage player,
+                              playerPosition = getPlayerPosition player,
+                              playerMovement = getPlayerMovement player,
+                              powerUp = getPlayerPowerUp player}
+          newEnemy  = Enemy  {enemyState = Dead,
+                              enemyHealth = getEnemyHealth enemy,
+                              enemyPosition = getEnemyPosition enemy,
+                              enemyMovement = getEnemyMovement enemy,
+                              enemyType = getEnemyType enemy}
+playerCollide player (enemy:rest) | checkCollision player enemy = (newPlayer, (newEnemy:rest))
+                                  | otherwise = playerCollide player rest
+    where newPlayer = Player {playerState = getPlayerState player,
+                              playerHealth = calcPlayerDamage player,
+                              playerPosition = getPlayerPosition player,
+                              playerMovement = getPlayerMovement player,
+                              powerUp = getPlayerPowerUp player}
+          newEnemy  = Enemy  {enemyState = Dead,
+                              enemyHealth = getEnemyHealth enemy,
+                              enemyPosition = getEnemyPosition enemy,
+                              enemyMovement = getEnemyMovement enemy,
+                              enemyType = getEnemyType enemy}
+
+checkCollision :: Player -> Enemy -> Bool
+checkCollision player enemy | (playerYplus >= enemyYmin) && (playerYplus <= enemyYplus) && (playerXplus >= enemyXmin) && (playerXplus <= enemyXplus) = True
+                            | (playerYmin <= enemyYplus) && (playerYmin >= enemyYmin) && (playerXplus >= enemyXmin) && (playerXplus <= enemyXplus) = True
+                            | otherwise = False                                                                                                                                                                                        
+    where   playerYplus = snd (playerPosition player) +10
+            playerYmin = snd (playerPosition player) -10
+            playerXplus = fst (playerPosition player) +10
+            enemyYplus = snd (enemyPosition enemy) +10
+            enemyYmin = snd (enemyPosition enemy) -10
+            enemyXplus = fst (enemyPosition enemy) +10
+            enemyXmin = fst (enemyPosition enemy) -10
+            
+
+calcPlayerDamage :: Player -> Health
+calcPlayerDamage player | getPlayerHealth player == Health 100 = Health 75
+                        | getPlayerHealth player == Health 75  = Health 50
+                        | getPlayerHealth player == Health 50  = Health 25
+                        | getPlayerHealth player == Health 25  = Health 0
+
+checkDeadPlayer :: Game -> Game
+checkDeadPlayer game | getPlayerHealth (player game) == Health 0 = game {player = newPlayer, gameState = Pause}
+                     | otherwise = game
+    where newPlayer = Player {playerState = Dead,
+                              playerHealth = Health 0,
+                              playerPosition = getPlayerPosition (player game),
+                              playerMovement = getPlayerMovement (player game),
+                              powerUp = getPlayerPowerUp (player game)}
+
 -- Score and Dead Enemies
-checkDead :: Game -> Game
-checkDead game = game {bullets = bulletList, enemies = enemyList, score = newScore}
+checkDeadEnemies :: Game -> Game
+checkDeadEnemies game = game {bullets = bulletList, enemies = enemyList, score = newScore}
     where newScore = calcScore (enemies game) (score game)
           bulletList = finalBulletList (bullets game)
           enemyList  = finalEnemyList  (enemies game)
@@ -214,36 +295,3 @@ calcSpawnRate _ 5500 = 0.25
 calcSpawnRate _ 6000 = 0.125
 calcSpawnRate _ 7500 = 0.1
 calcSpawnRate spawnRate _ = spawnRate
-
---Player collides with enemy
-mapEnemyPlayerCollide :: Game -> Game
-mapEnemyPlayerCollide game  | enemyPlayerCollide (enemies game) && (playerHealth (player game)) == Health 100 = game {player = Player { playerState = getPlayerState (player game),
-                                                                                                playerHealth = Health 75,
-                                                                                                playerPosition = getPlayerPosition (player game),
-                                                                                                playerMovement = getPlayerMovement (player game),
-                                                                                                powerUp = getPlayerPowerUp (player game)}}
-                            | enemyPlayerCollide (enemies game) && (playerHealth (player game)) == Health 75  = game {player = Player { playerState = getPlayerState (player game),
-                                                                                                playerHealth = Health 50,
-                                                                                                playerPosition = getPlayerPosition (player game),
-                                                                                                playerMovement = getPlayerMovement (player game),
-                                                                                                powerUp = getPlayerPowerUp (player game)}}
-                            | enemyPlayerCollide (enemies game) && (playerHealth (player game)) == Health 50  = game {player = Player { playerState = getPlayerState (player game),
-                                                                                                playerHealth = Health 25,
-                                                                                                playerPosition = getPlayerPosition (player game),
-                                                                                                playerMovement = getPlayerMovement (player game),
-                                                                                                powerUp = getPlayerPowerUp (player game)}}
-                            | enemyPlayerCollide (enemies game) && (playerHealth (player game)) == Health 25  = game {player = Player { playerState = getPlayerState (player game),
-                                                                                                playerHealth = Health 0,
-                                                                                                playerPosition = getPlayerPosition (player game),
-                                                                                                playerMovement = getPlayerMovement (player game),
-                                                                                                powerUp = getPlayerPowerUp (player game)}}
-                            | otherwise = game
-
-
-enemyPlayerCollide :: [Enemy] -> Bool
-enemyPlayerCollide [] = False
-enemyPlayerCollide [x]  | (fst (getEnemyPosition x) < -640) = True
-                        | otherwise = False
-enemyPlayerCollide (x:rest) | (fst (getEnemyPosition x) < -640) = True
-                            | otherwise = enemyPlayerCollide rest
-

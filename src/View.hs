@@ -8,43 +8,44 @@ render :: Game -> IO Picture
 render game = return (renderPure game)
 
 renderPure :: Game -> Picture
-renderPure game = pictures (menu' : score' : health' : player' : (enemies' ++ bullets'))
+renderPure game = pictures (end : menubar' : score' : health' : info : player' : (enemies' ++ bullets'))
     where player' = renderPlayer (player game)
           score' = (renderScore (score game))
           health' = (renderHealth (getPlayerHealth (player game)))
           enemies' = map renderEnemy (enemies game)
           bullets' = map renderBullet (bullets game)
-          menu' = renderMenu
+          menubar' = renderMenuBar
+          end = renderEnd (player game)
+          info = renderInfo
 
 renderPlayer :: Player -> Picture
-renderPlayer player = uncurry translate (playerLocation) $ color playerColor $ circleSolid 10
-    where playerColor = dark red
-          playerLocation = getPlayerPosition player
+renderPlayer player = uncurry translate (playerLocation) $ color (dark red) $ circleSolid 10
+    where playerLocation = getPlayerPosition player
 
 renderEnemy :: Enemy -> Picture
-renderEnemy enemy = uncurry translate (enemyLocation) $ color enemyColor $ circleSolid 12    
-    where enemyColor = light blue
-          enemyLocation = getEnemyPosition enemy
+renderEnemy enemy = uncurry translate (enemyLocation) $ color (light blue) $ circleSolid 12    
+    where enemyLocation = getEnemyPosition enemy
 
 renderBullet :: Bullet -> Picture
-renderBullet bullet = uncurry translate (bulletLocation) $ color bulletColor $ rectangleSolid 8 2
-    where bulletColor = light green
-          bulletLocation = getBulletPosition bullet
+renderBullet bullet = uncurry translate (bulletLocation) $ color (light green) $ rectangleSolid 8 2
+    where bulletLocation = getBulletPosition bullet
 
-renderMenu :: Picture
-renderMenu = uncurry translate (menuLocation) $ color menuColor $ rectangleSolid 1280 50
-    where menuColor = white
-          menuLocation = (0, 340)
+renderMenuBar :: Picture
+renderMenuBar = uncurry translate (0, 340) $ color white $ rectangleSolid 1280 50
 
 renderScore :: Int -> Picture
-renderScore score = uncurry translate (scoreLocation) $ scale 0.2 0.2 $ color scoreColor $ text ("Score: " ++ show score)
-    where scoreColor = black
-          scoreLocation = (-620, 330)
+renderScore score = uncurry translate (-620, 330) $ scale 0.2 0.2 $ color black $ text ("Score: " ++ show score)
 
 renderHealth :: Health -> Picture
-renderHealth health = uncurry translate (healthLocation) $ scale 0.2 0.2 $ color healthColor $ text (show health)
-    where healthColor = black
-          healthLocation = (475, 330)
+renderHealth health = uncurry translate (475, 330) $ scale 0.2 0.2 $ color black $ text (show health)
+
+renderInfo :: Picture
+renderInfo = uncurry translate (-250, 330) $ scale 0.2 0.2 $ color black $ text ("p = Pause     r = Restart")
+
+renderEnd :: Player -> Picture
+renderEnd player = case getPlayerState player of
+    Alive -> uncurry translate (0, 370) $ color white $ rectangleSolid 1 1
+    Dead  -> uncurry translate (-250, 0) $ scale 0.5 0.5 $ color red $ text ("You are Dead")
 
 fps :: Int
 fps = 60
